@@ -8,11 +8,11 @@ router = APIRouter(tags=["inference"])
 
 
 @router.post("/inference/embeddings", response_model=EmbeddingResponse)
-def embed_audio(
+async def embed_audio(
     body: EmbeddingRequest,
     inference_model: InferenceModelDep,
     minio_client: MinioClientDep,
 ):
-    return embed_endpoint_handler(
+    return await embed_endpoint_handler(
         body=body, inference_model=inference_model, minio_client=minio_client
     )

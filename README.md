@@ -9,5 +9,5 @@ uvicorn api.app:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ```sh
-docker build -t msv2-inference-gpu .
+docker build -t hatchikin/msv2-inference-gpu:latest .
 ```

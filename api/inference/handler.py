@@ -1,3 +1,4 @@
+import asyncio
 import tempfile
 from pathlib import Path
 
@@ -10,14 +11,14 @@ from api.core.dependencies import InferenceModelDep, MinioClientDep
 from api.models.api_schemas import EmbeddingRequest, EmbeddingResponse
 
 
-def embed_endpoint_handler(
+async def embed_endpoint_handler(
     body: EmbeddingRequest,
     inference_model: InferenceModelDep,
     minio_client: MinioClientDep,
 ):
     # Validate file exists in MinIO first
     try:
-        minio_client.stat_object(settings.AUDIO_BUCKET, body.path)
+        await asyncio.to_thread(minio_client.stat_object, settings.AUDIO_BUCKET, body.path)
     except S3Error as e:
         raise HTTPException(status_code=404, detail=f"Audio file not found: {body.path}")
 
@@ -31,7 +32,7 @@ def embed_endpoint_handler(
     try:
         # Download audio from MinIO
         try:
-            minio_client.fget_object(settings.AUDIO_BUCKET, body.path, tmp_path)
+            await asyncio.to_thread(minio_client.fget_object, settings.AUDIO_BUCKET, body.path, tmp_path)
         except Exception as e:
             raise HTTPException(
                 status_code=500, detail=f"Failed to download audio file: {e}"
@@ -40,7 +41,7 @@ def embed_endpoint_handler(
         # Run inference
         try:
             logger.info(f"Generating embeddings for {body.path}")
-            embedding = inference_model.run(tmp_path)
+            embedding = await asyncio.to_thread(inference_model.run, tmp_path)
         except Exception as e:
             logger.error(f"Inference failed for {body.path}: {e}")
             raise HTTPException(status_code=500, detail=f"Inference failed: {e}")
