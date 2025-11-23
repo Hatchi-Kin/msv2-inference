@@ -5,7 +5,7 @@ import soundfile as sf
 
 
 class OpenL3Inference:
-    def __init__(self, model_path, use_gpu=True):
+    def __init__(self, model_path, use_gpu=False):
         self.sr = 48000
         self.n_mels = 128
         self.frame_size = 2048
@@ -21,16 +21,17 @@ class OpenL3Inference:
         self.x_size = 199
         self.y_size = 128
 
-        providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
+        # CPU-first execution providers (GPU optional if available)
+        providers = ["CPUExecutionProvider"]
+        if use_gpu:
+            providers.insert(0, "CUDAExecutionProvider")
+
         try:
             self.session = ort.InferenceSession(model_path, providers=providers)
-            # Verify GPU is actually being used
-            if "CUDAExecutionProvider" not in self.session.get_providers():
-                raise RuntimeError(
-                    "CUDA provider not available. GPU is required for this service."
-                )
+            active_provider = self.session.get_providers()[0]
+            print(f"ONNX Runtime initialized with: {active_provider}")
         except Exception as e:
-            raise RuntimeError(f"Failed to initialize ONNX Runtime with GPU: {e}")
+            raise RuntimeError(f"Failed to initialize ONNX Runtime: {e}")
 
         self.input_name = self.session.get_inputs()[0].name
         self.output_name = self.session.get_outputs()[0].name

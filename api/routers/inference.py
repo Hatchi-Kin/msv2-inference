@@ -16,3 +16,11 @@ async def embed_audio(
     return await embed_endpoint_handler(
         body=body, inference_model=inference_model, minio_client=minio_client
     )
+
+
+@router.get("/test")
+async def test_inference_api(minio_client: MinioClientDep):
+    if minio_client.bucket_exists("megaset-sqlite"):
+        return "ok"
+    else:
+        return "not ok"

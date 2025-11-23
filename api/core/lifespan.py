@@ -51,15 +51,14 @@ def load_embeddings_model(app: FastAPI):
     else:
         logger.info("Model found locally.")
 
-    logger.info("Loading OpenL3 model with GPU...")
+    logger.info("Loading OpenL3 model with CPU...")
     try:
-        app.state.inference_model = OpenL3Inference(settings.MODEL_LOCAL_PATH)
-        logger.info("Model loaded successfully with GPU acceleration.")
-    except RuntimeError as e:
-        logger.critical(f"GPU initialization failed: {e}")
-        sys.exit(1)
+        app.state.inference_model = OpenL3Inference(
+            settings.MODEL_LOCAL_PATH, use_gpu=False
+        )
+        logger.info("Model loaded successfully with CPU inference.")
     except Exception as e:
-        logger.critical(f"Unexpected error loading model: {e}")
+        logger.critical(f"Failed to load model: {e}")
         sys.exit(1)
 
 

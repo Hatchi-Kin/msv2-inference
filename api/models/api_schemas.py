@@ -12,5 +12,3 @@ class EmbeddingResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     status: str
-
-
