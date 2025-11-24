@@ -19,9 +19,13 @@ async def embed_endpoint_handler(
 ):
     # Validate file exists in MinIO first
     start = time.time()
+    loop = asyncio.get_running_loop()
     try:
-        await asyncio.to_thread(
-            minio_client.stat_object, settings.AUDIO_BUCKET, body.path
+        await loop.run_in_executor(
+            None,
+            minio_client.stat_object,
+            settings.AUDIO_BUCKET,
+            body.path
         )
         logger.info(f"Audio file found in MinIO: {body.path}")
     except S3Error as e:
@@ -39,8 +43,12 @@ async def embed_endpoint_handler(
     try:
         # Download audio from MinIO
         try:
-            await asyncio.to_thread(
-                minio_client.fget_object, settings.AUDIO_BUCKET, body.path, tmp_path
+            await loop.run_in_executor(
+                None,
+                minio_client.fget_object,
+                settings.AUDIO_BUCKET,
+                body.path,
+                tmp_path
             )
             logger.info(f"Downloaded audio from MinIO: {body.path}")
         except Exception as e:
@@ -51,7 +59,7 @@ async def embed_endpoint_handler(
         # Run inference
         try:
             logger.info(f"Generating embeddings for {body.path}")
-            embedding = await asyncio.to_thread(inference_model.run, tmp_path)
+            embedding = await loop.run_in_executor(None, inference_model.run, tmp_path)
         except Exception as e:
             logger.error(f"Inference failed for {body.path}: {e}")
             raise HTTPException(status_code=500, detail=f"Inference failed: {e}")

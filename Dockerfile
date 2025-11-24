@@ -1,20 +1,19 @@
-# Use NVIDIA CUDA base image for GPU support
-FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+# Use NVIDIA CUDA 11.6 base image (Ubuntu 20.04) for Maxwell compatibility
+FROM nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
 
 ENV PYTHONUNBUFFERED=1
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Paris
 
-# Install system dependencies and Python 3.11
+# Install system dependencies and Python 3.8 (native to Ubuntu 20.04)
+# No external PPAs needed, reducing build failure risk.
 RUN apt-get update && apt-get install -y \
-    software-properties-common \
     curl \
     libsndfile1 \
-    && add-apt-repository ppa:deadsnakes/ppa \
-    && apt-get update && apt-get install -y \
-    python3.11 \
-    python3.11-venv \
-    python3.11-dev \
+    python3 \
+    python3-pip \
+    python3-venv \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv
@@ -23,9 +22,9 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 WORKDIR /app
 COPY . .
 
-# 1. Create venv with Python 3.11
+# 1. Create venv with system Python (3.8)
 # 2. Install project dependencies
-RUN uv venv .venv --python 3.11 && \
+RUN uv venv .venv --python /usr/bin/python3 && \
     uv pip install -p .venv .
 
 EXPOSE 8000

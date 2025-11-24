@@ -1,3 +1,4 @@
+from typing import List
 from pydantic import BaseModel, Field
 
 
@@ -6,8 +7,8 @@ class EmbeddingRequest(BaseModel):
 
 
 class EmbeddingResponse(BaseModel):
-    embedding: list[float]
-    shape: list[int]
+    embedding: List[float]
+    shape: List[int]
 
 
 class HealthResponse(BaseModel):

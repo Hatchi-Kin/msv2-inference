@@ -125,9 +125,17 @@ class OpenL3Inference:
         if batch.shape[0] == 0:
             return np.zeros(512)
 
-        # Run inference
-        outputs = self.session.run([self.output_name], {self.input_name: batch})
-        embeddings = outputs[0]
+        # Run inference in batches to avoid OOM on small GPUs
+        batch_size = 32
+        embeddings_list = []
+
+        for i in range(0, batch.shape[0], batch_size):
+            mini_batch = batch[i : i + batch_size]
+            outputs = self.session.run([self.output_name], {self.input_name: mini_batch})
+            embeddings_list.append(outputs[0])
+
+        # Concatenate all batch results
+        embeddings = np.concatenate(embeddings_list, axis=0)
 
         # Return mean pooled embedding
         return np.mean(embeddings, axis=0)
