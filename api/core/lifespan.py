@@ -51,12 +51,13 @@ def load_embeddings_model(app: FastAPI):
     else:
         logger.info("Model found locally.")
 
-    logger.info("Loading OpenL3 model with CPU...")
+    device_type = "GPU" if settings.USE_GPU else "CPU"
+    logger.info(f"Loading OpenL3 model with {device_type}...")
     try:
         app.state.inference_model = OpenL3Inference(
             settings.MODEL_LOCAL_PATH, use_gpu=settings.USE_GPU
         )
-        logger.info("Model loaded successfully with CPU inference.")
+        logger.info(f"Model loaded successfully with {device_type} inference.")
     except Exception as e:
         logger.critical(f"Failed to load model: {e}")
         sys.exit(1)
