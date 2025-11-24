@@ -12,6 +12,7 @@ class MinioSettings(BaseSettings):
 
 class ApiSettings(BaseSettings):
     ENABLE_DOCS: bool = False
+    USE_GPU: bool = False
 
     MODEL_BUCKET: str
     MODEL_FILE: str

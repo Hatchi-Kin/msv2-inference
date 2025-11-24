@@ -9,5 +9,6 @@ uvicorn api.app:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ```sh
-docker build -t hatchikin/msv2-inference:v0.11 .
+docker build -t hatchikin/msv2-inference:v0.13 .
 ```
+
